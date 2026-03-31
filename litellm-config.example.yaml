@@ -1,0 +1,116 @@
+model_list:
+  - model_name: complex
+    litellm_params:
+      model: google/gemini-3.1-pro-preview
+      custom_llm_provider: openai
+      api_base: "https://openrouter.ai/api/v1"
+      api_key: "os.environ/OPENROUTER_API_KEY"
+      extra_headers:
+        "HTTP-Referer": "http://localhost:4000"
+        "X-Title": "LiteLLM-Docker"
+
+  - model_name: simple
+    litellm_params:
+      model: openai/gpt-5-nano
+      custom_llm_provider: openai
+      api_base: "https://openrouter.ai/api/v1"
+      api_key: "os.environ/OPENROUTER_API_KEY"
+      extra_headers:
+        "HTTP-Referer": "http://localhost:4000"
+        "X-Title": "LiteLLM-Docker"
+  
+  - model_name: medium
+    litellm_params:
+      model: minimax/minimax-m2.5
+      custom_llm_provider: openai
+      api_base: "https://openrouter.ai/api/v1"
+      api_key: "os.environ/OPENROUTER_API_KEY"
+      extra_headers:
+        "HTTP-Referer": "http://localhost:4000"
+        "X-Title": "LiteLLM-Docker"
+
+  - model_name: reasoning
+    litellm_params:
+      model: minimax/minimax-m2.7
+      custom_llm_provider: openai
+      api_base: "https://openrouter.ai/api/v1"
+      api_key: "os.environ/OPENROUTER_API_KEY"
+      extra_headers:
+        "HTTP-Referer": "http://localhost:4000"
+        "X-Title": "LiteLLM-Docker"
+
+  - model_name: openclaw-smart-router
+    litellm_params:
+      model: auto_router/complexity_router
+      complexity_router_config:
+        tiers:
+          SIMPLE: simple
+          MEDIUM: medium
+          REASONING: reasoning
+          COMPLEX: complex
+        
+        tier_boundaries:
+          simple_medium: 0.15
+          medium_complex: 0.35
+          complex_reasoning: 0.60
+        
+        # Token count thresholds
+        token_thresholds:
+          simple: 15    # Below this = "short" (default: 15)
+          complex: 400  # Above this = "long" (default: 400)
+        
+        # Dimension weights (must sum to ~1.0)
+        dimension_weights:
+          tokenCount: 0.10
+          codePresence: 0.3
+          reasoningMarkers: 0.25
+          technicalTerms: 0.25
+          simpleIndicators: 0.05
+          multiStepPatterns: 0.03
+          questionComplexity: 0.02
+        
+        # Override default keyword lists
+        code_keywords:
+          - function
+          - class
+          - def
+          - async
+          - database
+          - refactor
+          - unit test
+          - boilerplate
+          - algorithm
+          - optimization
+        
+        reasoning_keywords:
+          - step by step
+          - từng bước
+          - think through
+          - suy nghĩ
+          - analyze
+          - phân tích
+          - evaluate
+          - đánh giá
+          - compare
+          - so sánh
+          - reasoning
+          - lập luận
+          - logic
+          - inference
+          - suy luận
+          - multi-step
+          - đa bước
+          - lập kế hoạch
+          - roadmap
+          - kiến trúc
+          - system design
+          - tại sao code này không chạy
+          
+      # Fallback model if tier cannot be determined
+      complexity_router_default_model: gpt-5-nano
+
+general_settings:
+  master_key: "os.environ/LITELLM_MASTER_KEY" # This is the key you'll use to talk to LiteLLM
+
+litellm_settings: # module level litellm settings - https://github.com/BerriAI/litellm/blob/main/litellm/__init__.py
+  drop_params: True

@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+litellm-config.yaml
+
+# Local secret material
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.csr
+*.der

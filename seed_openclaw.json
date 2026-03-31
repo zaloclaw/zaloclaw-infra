@@ -1,0 +1,124 @@
+{
+  "browser": {
+    "enabled": true,
+    "remoteCdpTimeoutMs": 1500,
+    "remoteCdpHandshakeTimeoutMs": 3000,
+    "color": "#FF4500",
+    "executablePath": "/home/node/.cache/ms-playwright/chromium-1208/chrome-linux/chrome",
+    "headless": false,
+    "noSandbox": false,
+    "attachOnly": false,
+    "defaultProfile": "remote",
+    "ssrfPolicy": {
+      "dangerouslyAllowPrivateNetwork": true
+    },
+    "profiles": {
+      "openclaw": {
+        "cdpPort": 18800,
+        "color": "#FF4500"
+      },
+      "work": {
+        "cdpPort": 18801,
+        "color": "#0066CC"
+      },
+      "user": {
+        "driver": "existing-session",
+        "attachOnly": true,
+        "color": "#00AA00"
+      },
+      "remote": {
+        "cdpUrl": "__OPENCLAW_REMOTE_CDP_URL__",
+        "attachOnly": true,
+        "color": "#00AA00"
+      }
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "litellm": {
+        "baseUrl": "http://host.docker.internal:4000",
+        "apiKey": "__LITELLM_API_KEY__",
+        "auth": "api-key",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "openclaw-smart-router",
+            "name": "Auto Router - Complexity",
+            "reasoning": false,
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 128000,
+            "maxTokens": 8192
+          }
+        ]
+      }
+    }
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "lan",
+    "controlUi": {
+      "allowedOrigins": [
+        "http://127.0.0.1:__OPENCLAW_GATEWAY_PORT__",
+        "http://localhost:3000"
+      ],
+      "dangerouslyAllowHostHeaderOriginFallback": true,
+      "allowInsecureAuth": true,
+      "dangerouslyDisableDeviceAuth": true
+    },
+    "auth": {
+      "mode": "token"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    },
+    "nodes": {
+      "denyCommands": [
+        "camera.snap",
+        "camera.clip",
+        "screen.record",
+        "contacts.add",
+        "calendar.add",
+        "reminders.add",
+        "sms.send"
+      ]
+    }
+  },
+  "skills": {
+    "load": {
+      "extraDirs": [
+        "__OPENCLAW_WORKSPACE_DIR__/skills"
+      ],
+      "watch": true
+    },
+    "install": {
+      "nodeManager": "npm"
+    },
+    "entries": {
+      "mcporter": {
+        "enabled": true
+      }
+    }
+  },
+  "plugins": {
+    "entries": {
+      "telegram": {
+        "enabled": true
+      },
+      "zalo": {
+        "enabled": true
+      }
+    }
+  }
+}
