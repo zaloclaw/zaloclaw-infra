@@ -88,7 +88,7 @@ services:
   litellm:
     image: docker.litellm.ai/berriai/litellm:main-stable
     volumes:
-      - ./litellm-config.yaml:/app/config.yaml:ro
+      - ./litellm/litellm-config.yaml:/app/config.yaml:ro
     command:
       - "--config=/app/config.yaml"
     ports:

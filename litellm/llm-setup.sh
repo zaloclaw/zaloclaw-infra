@@ -13,7 +13,8 @@ NC='\033[0m' # No Color
 
 # Directories
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ENV_FILE="${SCRIPT_DIR}/.env"
+ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+ENV_FILE="${ROOT_DIR}/.env"
 CONFIG_FILE="${SCRIPT_DIR}/litellm-config.yaml"
 
 # ============================================================================
@@ -347,7 +348,7 @@ main() {
         echo "   ${YELLOW}GOOGLE_API_KEY=your-google-api-key${NC}"
         echo ""
         echo "4. After adding keys, run this script again:"
-        echo "   ${YELLOW}./llm-setup.sh${NC}"
+        echo "   ${YELLOW}./litellm/llm-setup.sh${NC}"
         echo ""
         exit 1
     fi

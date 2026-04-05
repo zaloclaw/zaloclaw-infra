@@ -3,10 +3,10 @@ set -euo pipefail
 
 # Dangerous cleanup utility:
 # - stops Docker Compose stacks for this repository
-# - removes ~/openclaw_z
+# - removes ~/.openclaw_z
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TARGET_DIR="${HOME}/openclaw_z"
+TARGET_DIR="${HOME}/.openclaw_z"
 ASSUME_YES="${1:-}"
 
 warn() {

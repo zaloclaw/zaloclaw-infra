@@ -38,7 +38,7 @@
     "providers": {
       "litellm": {
         "baseUrl": "http://host.docker.internal:4000",
-        "apiKey": "__LITELLM_API_KEY__",
+        "apiKey": "__LITELLM_MASTER_KEY__",
         "auth": "api-key",
         "api": "openai-completions",
         "models": [
@@ -62,6 +62,86 @@
         ]
       }
     }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "litellm/openclaw-smart-router"
+      },
+      "models": {
+        "litellm/openclaw-smart-router": {
+          "alias": "LiteLLM"
+        }
+      },
+      "workspace": "/home/node/.openclaw/workspace",
+      "compaction": {
+        "mode": "safeguard"
+      },
+      "sandbox": {
+        "mode": "off"
+      }
+    },
+    "list": [
+      {
+        "id": "main",
+        "model": "litellm/openclaw-smart-router",
+        "skills": [
+          "local-search",
+          "1password",
+          "apple-notes",
+          "apple-reminders",
+          "bear-notes",
+          "blogwatcher",
+          "blucli",
+          "bluebubbles",
+          "camsnap",
+          "clawhub",
+          "coding-agent",
+          "discord",
+          "eightctl",
+          "gemini",
+          "gh-issues",
+          "gifgrep",
+          "github",
+          "gog",
+          "goplaces",
+          "healthcheck",
+          "himalaya",
+          "imsg",
+          "model-usage",
+          "nano-banana-pro",
+          "nano-pdf",
+          "node-connect",
+          "notion",
+          "obsidian",
+          "openai-image-gen",
+          "openai-whisper",
+          "openai-whisper-api",
+          "openhue",
+          "oracle",
+          "ordercli",
+          "peekaboo",
+          "sag",
+          "session-logs",
+          "sherpa-onnx-tts",
+          "skill-creator",
+          "slack",
+          "songsee",
+          "sonoscli",
+          "spotify-player",
+          "summarize",
+          "things-mac",
+          "tmux",
+          "trello",
+          "video-frames",
+          "voice-call",
+          "wacli",
+          "weather",
+          "xurl",
+          "mcporter"
+        ]
+      }
+    ]
   },
   "gateway": {
     "port": 18789,
@@ -98,7 +178,7 @@
   "skills": {
     "load": {
       "extraDirs": [
-        "__OPENCLAW_WORKSPACE_DIR__/skills"
+        "/home/node/.openclaw/workspace/skills"
       ],
       "watch": true
     },
