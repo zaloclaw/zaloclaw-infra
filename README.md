@@ -1,10 +1,10 @@
-# ZaloClaw Infra
+# ZaloClaw Infra 🚀
 
 Spin up a production-ready OpenClaw Docker environment in minutes, with smarter model routing and useful tooling preinstalled.
 
 ![ZaloClaw benefits](image/README/Zclawbenefit.png)
 
-## Why this repo exists
+## Why this repo exists 🎯
 
 This repository simplifies OpenClaw installation and day-1 operations by focusing on three practical goals:
 
@@ -12,23 +12,23 @@ This repository simplifies OpenClaw installation and day-1 operations by focusin
 2. Use a LiteLLM router so requests can be routed to lower-cost models when appropriate, instead of always using expensive models.
 3. Preinstall common runtime tools and dependencies in the gateway container, including Playwright and gog CLI.
 
-## What you get
+## What you get ✨
 
-- Automated OpenClaw Docker setup and startup.
-- LiteLLM configuration generation from your environment keys.
-- Seeded OpenClaw config for browser, gateway, models, plugins, agents, and skills.
-- Playwright Linux dependencies and Chromium installation.
-- gog CLI installed in the running gateway container.
+- 🐳 Automated OpenClaw Docker setup and startup.
+- 🧠 LiteLLM configuration generation from your environment keys.
+- ⚙️ Seeded OpenClaw config for browser, gateway, models, plugins, agents, and skills.
+- 🎭 Playwright Linux dependencies and Chromium installation.
+- 🛠️ gog CLI installed in the running gateway container.
 
-## Prerequisites
+## Prerequisites 📦
 
 - macOS or Linux shell
 - Docker + Docker Compose
 - One or more model provider keys in your environment (OpenAI, Google, Anthropic, or OpenRouter)
 
-## Quick Start
+## Quick Start ⚡
 
-### 1) Set up environment
+### 1) Set up environment 🧩
 
 Create your environment file:
 
@@ -43,7 +43,7 @@ Then edit .env and set at least:
 
 Optional but useful defaults are already present in .env.example, including OpenClaw ports, config directory, and workspace directory.
 
-### 2) Run the setup script
+### 2) Run the setup script ▶️
 
 ```bash
 chmod +x zaloclaw-docker-setup.sh
@@ -59,14 +59,14 @@ This script orchestrates the full setup:
 - Installs Chromium for Playwright.
 - Installs gog CLI in the gateway container.
 
-## After setup
+## After setup ✅
 
 You should have:
 
-- OpenClaw gateway running in Docker.
-- A working LiteLLM smart router profile for complexity-based model selection.
-- Playwright + Chromium ready for browser automation workflows.
-- gog CLI ready inside the gateway container.
+- 🐳 OpenClaw gateway running in Docker.
+- 🧭 A working LiteLLM smart router profile for complexity-based model selection.
+- 🎭 Playwright + Chromium ready for browser automation workflows.
+- 🛠️ gog CLI ready inside the gateway container.
 
 To inspect logs:
 
@@ -74,12 +74,12 @@ To inspect logs:
 docker compose logs -f openclaw-gateway
 ```
 
-## Notes
+## Notes 📝
 
 - If you rerun the script, it will reuse existing config where possible.
 - Keep your .env file private and never commit real API keys.
 
-## Author
+## Author 👤
 
 - Name: Hưng Nguyễn
 - Description: Đam mê AI, thích tự động hoá và đơn gian mọi thứ
