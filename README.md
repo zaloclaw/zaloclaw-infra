@@ -78,3 +78,8 @@ docker compose logs -f openclaw-gateway
 
 - If you rerun the script, it will reuse existing config where possible.
 - Keep your .env file private and never commit real API keys.
+
+## Author
+
+- Name: Hưng Nguyễn
+- Description: Đam mê AI, thích tự động hoá và đơn gian mọi thứ
