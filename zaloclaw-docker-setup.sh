@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_PATH="$ROOT_DIR/.env"
 
 # Use the official prebuilt image and persist /home/node so Playwright browser
 # downloads survive one-off `docker compose run` containers.
@@ -13,7 +14,7 @@ LITELLM_CONFIG_FILE="$ROOT_DIR/litellm/litellm-config.yaml"
 
 read_env_value() {
 	local key="$1"
-	local env_path="$ROOT_DIR/.env"
+	local env_path="$ENV_PATH"
 	local value="${!key:-}"
 
 	if [[ -n "$value" ]]; then
@@ -33,14 +34,52 @@ read_env_value() {
 	echo "$value"
 }
 
-OPENCLAW_CONFIG_DIR="$(read_env_value "OPENCLAW_CONFIG_DIR")"
-OPENCLAW_CONFIG_DIR="${OPENCLAW_CONFIG_DIR:-$HOME/.openclaw_z}"
+validate_required_env() {
+	local required_vars=(
+		"OPENCLAW_CONFIG_DIR"
+		"OPENCLAW_WORKSPACE_DIR"
+		"LITELLM_MASTER_KEY"
+	)
+	local provider_vars=(
+		"OPENAI_API_KEY"
+		"GOOGLE_API_KEY"
+		"ANTHROPIC_API_KEY"
+		"OPENROUTER_API_KEY"
+	)
+	local missing_vars=()
+	local key=""
+	local provider_present=0
 
-OPENCLAW_WORKSPACE_NAME="$(read_env_value "OPENCLAW_WORKSPACE_NAME")"
-OPENCLAW_WORKSPACE_NAME="${OPENCLAW_WORKSPACE_NAME:-workspace}"
+	for key in "${required_vars[@]}"; do
+		if [[ -z "$(read_env_value "$key")" ]]; then
+			missing_vars+=("$key")
+		fi
+	done
+
+	for key in "${provider_vars[@]}"; do
+		if [[ -n "$(read_env_value "$key")" ]]; then
+			provider_present=1
+			break
+		fi
+	done
+
+	if (( ${#missing_vars[@]} > 0 )) || (( provider_present == 0 )); then
+		echo "ERROR: Missing required configuration in $ENV_PATH (or exported env vars)." >&2
+		if (( ${#missing_vars[@]} > 0 )); then
+			echo "  Required variables not set: ${missing_vars[*]}" >&2
+		fi
+		if (( provider_present == 0 )); then
+			echo "  Set at least one provider key: OPENAI_API_KEY, GOOGLE_API_KEY, ANTHROPIC_API_KEY, or OPENROUTER_API_KEY" >&2
+		fi
+		exit 1
+	fi
+}
+
+validate_required_env
+
+OPENCLAW_CONFIG_DIR="$(read_env_value "OPENCLAW_CONFIG_DIR")"
 
 OPENCLAW_WORKSPACE_DIR="$(read_env_value "OPENCLAW_WORKSPACE_DIR")"
-OPENCLAW_WORKSPACE_DIR="${OPENCLAW_WORKSPACE_DIR:-$OPENCLAW_CONFIG_DIR/$OPENCLAW_WORKSPACE_NAME}"
 
 OPENCLAW_GATEWAY_PORT="$(read_env_value "OPENCLAW_GATEWAY_PORT")"
 OPENCLAW_GATEWAY_PORT="${OPENCLAW_GATEWAY_PORT:-18789}"

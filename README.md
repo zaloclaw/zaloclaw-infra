@@ -1,5 +1,7 @@
 # ZaloClaw Infra 🚀
 
+🇻🇳 Vietnamese version: [README.vn.md](README.vn.md)
+
 Spin up a production-ready OpenClaw Docker environment in minutes, with smarter model routing and useful tooling preinstalled.
 
 > [!IMPORTANT]
@@ -41,10 +43,13 @@ cp .env.example .env
 
 Then edit .env and set at least:
 
+- OPENCLAW_CONFIG_DIR
+- OPENCLAW_WORKSPACE_DIR
 - LITELLM_MASTER_KEY
 - One provider API key (for example OPENAI_API_KEY, GOOGLE_API_KEY, ANTHROPIC_API_KEY, or OPENROUTER_API_KEY)
 
-Optional but useful defaults are already present in .env.example, including OpenClaw ports, config directory, and workspace directory.
+The setup script validates these values and exits early if they are missing.
+Other values in .env.example (for example ports and image tags) can keep their defaults.
 
 ### 2) Run the setup script ▶️
 
