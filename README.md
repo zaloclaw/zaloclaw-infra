@@ -2,6 +2,8 @@
 
 Spin up a production-ready OpenClaw Docker environment in minutes, with smarter model routing and useful tooling preinstalled.
 
+![ZaloClaw benefits](image/README/Zclawbenefit.png)
+
 ## Why this repo exists
 
 This repository simplifies OpenClaw installation and day-1 operations by focusing on three practical goals:
