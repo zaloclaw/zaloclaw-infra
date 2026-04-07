@@ -29,6 +29,27 @@ Repo này sinh ra để việc cài OpenClaw và chạy từ ngày đầu đỡ 
 - Docker + Docker Compose
 - Ít nhất một API key của nhà cung cấp model (OpenAI, Google, Anthropic hoặc OpenRouter)
 
+## Cài Docker Desktop trên macOS 🍎
+
+Nếu máy bạn chưa có Docker, làm nhanh theo mấy bước này:
+
+1. Vào trang tải Docker Desktop: https://www.docker.com/products/docker-desktop/
+2. Chọn đúng bản cho máy Mac của bạn:
+	- Apple Silicon (M1, M2, M3...)
+	- Intel Chip
+3. Tải file .dmg, mở lên rồi kéo Docker vào Applications.
+4. Mở Docker Desktop lần đầu và cấp quyền khi macOS hỏi (network, privileged helper, v.v.).
+5. Chờ Docker báo trạng thái Running.
+
+Kiểm tra cài đặt đã ổn chưa:
+
+```bash
+docker --version
+docker compose version
+```
+
+Nếu cả 2 lệnh đều ra version thì máy bạn đã sẵn sàng để chạy script setup.
+
 ## Bắt đầu nhanh ⚡
 
 ### 1) Chuẩn bị file môi trường 🧩
