@@ -4,9 +4,13 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_PATH="$ROOT_DIR/.env"
 
-# Use the official prebuilt image and persist /home/node so Playwright browser
-# downloads survive one-off `docker compose run` containers.
-OPENCLAW_IMAGE="ghcr.io/openclaw/openclaw:2026.3.31"
+# Build a local image that extends the official OpenClaw image with
+# Playwright/Chromium and gog preinstalled.
+OPENCLAW_BASE_IMAGE="ghcr.io/openclaw/openclaw:2026.3.31"
+OPENCLAW_BASE_VERSION="${OPENCLAW_BASE_IMAGE##*:}"
+OPENCLAW_IMAGE="${OPENCLAW_IMAGE:-openclaw:${OPENCLAW_BASE_VERSION}-zaloclaw}"
+OPENCLAW_BOOTSTRAP_IMAGE="$OPENCLAW_BASE_IMAGE"
+OPENCLAW_DOCKERFILE="$ROOT_DIR/Dockerfile.zaloclaw"
 OPENCLAW_HOME_VOLUME="openclaw_home"
 
 LITELLM_SETUP_SCRIPT="$ROOT_DIR/litellm/llm-setup.sh"
@@ -323,7 +327,14 @@ NODE
 seed_openclaw_config
 ensure_litellm_config
 
-OPENCLAW_IMAGE="$OPENCLAW_IMAGE" \
+echo "==> Building custom OpenClaw image: $OPENCLAW_IMAGE"
+docker build \
+	--build-arg "OPENCLAW_BASE_IMAGE=$OPENCLAW_BASE_IMAGE" \
+	-t "$OPENCLAW_IMAGE" \
+	-f "$OPENCLAW_DOCKERFILE" \
+	"$ROOT_DIR"
+
+OPENCLAW_IMAGE="$OPENCLAW_BOOTSTRAP_IMAGE" \
 OPENCLAW_HOME_VOLUME="$OPENCLAW_HOME_VOLUME" \
 OPENCLAW_CONFIG_DIR="$OPENCLAW_CONFIG_DIR" \
 OPENCLAW_WORKSPACE_DIR="$OPENCLAW_WORKSPACE_DIR" \
@@ -331,46 +342,23 @@ OPENCLAW_GATEWAY_PORT="$OPENCLAW_GATEWAY_PORT" \
 OPENCLAW_REMOTE_CDP_URL="$OPENCLAW_REMOTE_CDP_URL" \
 ./docker-setup.sh
 
-echo "==> Installing Playwright Linux runtime dependencies in gateway container"
-docker compose exec -T --user root openclaw-gateway sh -lc 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libnspr4 libnss3 libatk1.0-0 libatk-bridge2.0-0 libdbus-1-3 libcups2 libxkbcommon0 libatspi2.0-0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2'
+compose_args=(-f "$ROOT_DIR/docker-compose.yml")
+if [[ -f "$ROOT_DIR/docker-compose.extra.yml" ]]; then
+	compose_args+=(-f "$ROOT_DIR/docker-compose.extra.yml")
+fi
+
+echo "==> Recreating gateway with custom OpenClaw image: $OPENCLAW_IMAGE"
+OPENCLAW_IMAGE="$OPENCLAW_IMAGE" docker compose "${compose_args[@]}" up -d --force-recreate openclaw-gateway
 
 echo "==> Checking Playwright version in gateway container"
 docker compose exec -T --user node openclaw-gateway sh -lc 'node -e "console.log(require(\"playwright-core/package.json\").version)"'
 
-echo "==> Installing Chromium via Playwright"
-docker compose exec -T --user node openclaw-gateway sh -lc 'PLAYWRIGHT_BROWSERS_PATH=/home/node/.cache/ms-playwright node /app/node_modules/playwright-core/cli.js install chromium'
-
 echo "==> Chromium executable path"
 docker compose exec -T --user node openclaw-gateway sh -lc 'PLAYWRIGHT_BROWSERS_PATH=/home/node/.cache/ms-playwright node -e "const p=require(\"playwright-core\"); console.log(p.chromium.executablePath());"'
-
-echo "==> Installing gog CLI dependencies in gateway container"
-docker compose exec -T --user root openclaw-gateway sh -lc 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates curl tar'
-
-echo "==> Installing gog CLI (official prebuilt release)"
-docker compose exec -T --user root openclaw-gateway sh -lc '
-set -e
-version="0.12.0"
-case "$(uname -m)" in
-	x86_64|amd64) arch="amd64" ;;
-	aarch64|arm64) arch="arm64" ;;
-	*)
-		echo "ERROR: Unsupported architecture for gog prebuilt install: $(uname -m)" >&2
-		exit 1
-		;;
-esac
-
-url="https://github.com/steipete/gogcli/releases/download/v${version}/gogcli_${version}_linux_${arch}.tar.gz"
-tmpdir="$(mktemp -d)"
-trap "rm -rf \"$tmpdir\"" EXIT
-
-curl -fsSL "$url" -o "$tmpdir/gogcli.tar.gz"
-tar -xzf "$tmpdir/gogcli.tar.gz" -C "$tmpdir"
-install -m 0755 "$tmpdir/gog" /usr/local/bin/gog
-'
 
 echo "==> Checking gog CLI version"
 docker compose exec -T --user node openclaw-gateway sh -lc 'gog --version'
 
-echo "==> Done. Browser deps, Chromium, and gog CLI installed in running gateway container."
+echo "==> Done. Browser deps, Chromium, and gog CLI are preinstalled in the custom image."
 echo "==> Chromium cache path: /home/node/.cache/ms-playwright (persisted by OPENCLAW_HOME_VOLUME=$OPENCLAW_HOME_VOLUME)."
 echo "==> gog CLI path: /usr/local/bin/gog"

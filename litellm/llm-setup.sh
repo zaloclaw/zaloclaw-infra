@@ -199,8 +199,10 @@ generate_complexity_router() {
         
         tier_boundaries:
           simple_medium: 0.15
-          medium_complex: 0.35
-          complex_reasoning: 0.60
+          # Raise thresholds so COMPLEX/REASONING are selected less often.
+          # This reduces traffic sent to gpt-5.4 unless the prompt is clearly hard.
+          medium_complex: 0.50
+          complex_reasoning: 0.75
         
         # Token count thresholds
         token_thresholds:
