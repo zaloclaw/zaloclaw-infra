@@ -6,10 +6,7 @@ ENV_PATH="$ROOT_DIR/.env"
 
 # Build a local image that extends the official OpenClaw image with
 # Playwright/Chromium and gog preinstalled.
-OPENCLAW_BASE_IMAGE="ghcr.io/openclaw/openclaw:2026.3.31"
-OPENCLAW_BASE_VERSION="${OPENCLAW_BASE_IMAGE##*:}"
-OPENCLAW_IMAGE="${OPENCLAW_IMAGE:-openclaw:${OPENCLAW_BASE_VERSION}-zaloclaw}"
-OPENCLAW_BOOTSTRAP_IMAGE="$OPENCLAW_BASE_IMAGE"
+OPENCLAW_DEFAULT_BASE_IMAGE="ghcr.io/openclaw/openclaw:2026.3.31"
 OPENCLAW_DOCKERFILE="$ROOT_DIR/Dockerfile.zaloclaw"
 OPENCLAW_HOME_VOLUME="openclaw_home"
 
@@ -37,6 +34,12 @@ read_env_value() {
 	value="${value#\'}"
 	echo "$value"
 }
+
+OPENCLAW_BASE_IMAGE="$(read_env_value "OPENCLAW_IMAGE")"
+OPENCLAW_BASE_IMAGE="${OPENCLAW_BASE_IMAGE:-$OPENCLAW_DEFAULT_BASE_IMAGE}"
+OPENCLAW_BASE_VERSION="${OPENCLAW_BASE_IMAGE##*:}"
+OPENCLAW_IMAGE="openclaw:${OPENCLAW_BASE_VERSION}-zaloclaw"
+OPENCLAW_BOOTSTRAP_IMAGE="$OPENCLAW_BASE_IMAGE"
 
 validate_required_env() {
 	local required_vars=(

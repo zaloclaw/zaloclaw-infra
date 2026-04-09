@@ -200,5 +200,19 @@
         "enabled": true
       }
     }
+  },
+  "tools": {
+    "profile": "full",
+    "alsoAllow": [
+      "/usr/local/bin/gog",
+      "/bin/ls",
+      "/usr/bin/ls",
+      "/bin/sh",
+      "/bin/bash"
+    ],
+    "exec": {
+      "security": "full",
+      "ask": "off"
+    }
   }
 }
