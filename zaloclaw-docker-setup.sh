@@ -154,6 +154,42 @@ except Exception:
 
 seeded = []
 
+if not isinstance(cfg, dict):
+		cfg = {}
+
+had_agents = "agents" in cfg
+
+template_seed = copy.deepcopy(template)
+remote = template_seed.get("browser", {}).get("profiles", {}).get("remote", {})
+if isinstance(remote, dict) and remote.get("cdpUrl") == "__OPENCLAW_REMOTE_CDP_URL__":
+		remote["cdpUrl"] = cdp_url
+
+allowed = template_seed.get("gateway", {}).get("controlUi", {}).get("allowedOrigins", [])
+if isinstance(allowed, list):
+		for i, origin in enumerate(allowed):
+				if isinstance(origin, str) and "__OPENCLAW_GATEWAY_PORT__" in origin:
+						allowed[i] = origin.replace("__OPENCLAW_GATEWAY_PORT__", gw_port)
+
+merged_paths = []
+
+def merge_missing(dst, src, path=()):
+		if not isinstance(dst, dict) or not isinstance(src, dict):
+				return
+		for key, value in src.items():
+				next_path = path + (key,)
+				if had_agents and next_path == ("agents", "defaults", "workspace"):
+						continue
+				if key not in dst:
+						dst[key] = copy.deepcopy(value)
+						merged_paths.append(next_path)
+						continue
+				if isinstance(dst.get(key), dict) and isinstance(value, dict):
+						merge_missing(dst[key], value, next_path)
+
+merge_missing(cfg, template_seed)
+if merged_paths:
+		seeded.extend(sorted({path[0] for path in merged_paths if len(path) > 0}))
+
 def update_litellm_api_key(models_obj):
 		providers = models_obj.get("providers", {}) if isinstance(models_obj, dict) else {}
 		litellm = providers.get("litellm") if isinstance(providers, dict) else None
@@ -165,54 +201,6 @@ def update_litellm_api_key(models_obj):
 				return False
 		litellm["apiKey"] = litellm_master_key
 		return True
-
-if "browser" not in cfg:
-		browser = copy.deepcopy(template.get("browser", {}))
-		remote = browser.get("profiles", {}).get("remote", {})
-		if remote.get("cdpUrl") == "__OPENCLAW_REMOTE_CDP_URL__":
-				remote["cdpUrl"] = cdp_url
-		cfg["browser"] = browser
-		seeded.append("browser")
-
-if "gateway" not in cfg:
-		gateway = copy.deepcopy(template.get("gateway", {}))
-		allowed = gateway.get("controlUi", {}).get("allowedOrigins", [])
-		for i, origin in enumerate(allowed):
-				if "__OPENCLAW_GATEWAY_PORT__" in origin:
-						allowed[i] = origin.replace("__OPENCLAW_GATEWAY_PORT__", gw_port)
-		cfg["gateway"] = gateway
-		seeded.append("gateway")
-
-if "skills" not in cfg:
-		skills = copy.deepcopy(template.get("skills", {}))
-		cfg["skills"] = skills
-		seeded.append("skills")
-
-if "plugins" not in cfg:
-		cfg["plugins"] = copy.deepcopy(template.get("plugins", {}))
-		seeded.append("plugins")
-
-if "models" not in cfg:
-		cfg["models"] = copy.deepcopy(template.get("models", {}))
-		seeded.append("models")
-
-if "agents" not in cfg:
-		cfg["agents"] = copy.deepcopy(template.get("agents", {}))
-		seeded.append("agents")
-else:
-		tpl_agents = template.get("agents", {})
-		cfg_agents = cfg["agents"]
-		tpl_defaults = tpl_agents.get("defaults", {})
-		cfg_defaults = cfg_agents.setdefault("defaults", {})
-		added = [k for k in tpl_defaults if k not in cfg_defaults and k != "workspace"]
-		for k in added:
-				cfg_defaults[k] = copy.deepcopy(tpl_defaults[k])
-		if added:
-				seeded.append("agents.defaults.merge")
-		if "list" not in cfg_agents and "list" in tpl_agents:
-				cfg_agents["list"] = copy.deepcopy(tpl_agents["list"])
-				seeded.append("agents.list")
-
 if update_litellm_api_key(cfg.get("models", {})):
 		seeded.append("models.litellm.apiKey")
 
@@ -240,6 +228,54 @@ try {
 
 const seeded = [];
 
+if (!cfg || typeof cfg !== "object" || Array.isArray(cfg)) {
+	cfg = {};
+}
+
+const hadAgents = Object.prototype.hasOwnProperty.call(cfg, "agents");
+
+const clone = (v) => JSON.parse(JSON.stringify(v));
+const templateSeed = clone(template);
+
+const remote = templateSeed?.browser?.profiles?.remote;
+if (remote?.cdpUrl === "__OPENCLAW_REMOTE_CDP_URL__") {
+	remote.cdpUrl = cdpUrl;
+}
+
+const allowedOrigins = templateSeed?.gateway?.controlUi?.allowedOrigins;
+if (Array.isArray(allowedOrigins)) {
+	templateSeed.gateway.controlUi.allowedOrigins = allowedOrigins.map((origin) =>
+		typeof origin === "string" && origin.includes("__OPENCLAW_GATEWAY_PORT__")
+			? origin.replace(/__OPENCLAW_GATEWAY_PORT__/g, gwPort)
+			: origin
+	);
+}
+
+const mergedPaths = [];
+const mergeMissing = (dst, src, path = []) => {
+	if (!dst || typeof dst !== "object" || Array.isArray(dst)) return;
+	if (!src || typeof src !== "object" || Array.isArray(src)) return;
+	for (const [k, v] of Object.entries(src)) {
+		const nextPath = [...path, k];
+		if (hadAgents && nextPath.length === 3 && nextPath[0] === "agents" && nextPath[1] === "defaults" && nextPath[2] === "workspace") {
+			continue;
+		}
+		if (!(k in dst)) {
+			dst[k] = clone(v);
+			mergedPaths.push(nextPath);
+			continue;
+		}
+		if (dst[k] && typeof dst[k] === "object" && !Array.isArray(dst[k]) && v && typeof v === "object" && !Array.isArray(v)) {
+			mergeMissing(dst[k], v, nextPath);
+		}
+	}
+};
+
+mergeMissing(cfg, templateSeed);
+if (mergedPaths.length > 0) {
+	seeded.push(...Array.from(new Set(mergedPaths.filter((p) => p.length > 0).map((p) => p[0]))).sort());
+}
+
 const updateLitellmApiKey = (modelsObj) => {
 	const providers = modelsObj && typeof modelsObj === "object" ? modelsObj.providers : undefined;
 	const litellm = providers && typeof providers === "object" ? providers.litellm : undefined;
@@ -249,66 +285,6 @@ const updateLitellmApiKey = (modelsObj) => {
 	litellm.apiKey = litellmMasterKey;
 	return true;
 };
-
-if (!("browser" in cfg)) {
-	const browser = JSON.parse(JSON.stringify(template.browser ?? {}));
-	const remote = browser?.profiles?.remote;
-	if (remote?.cdpUrl === "__OPENCLAW_REMOTE_CDP_URL__") {
-		remote.cdpUrl = cdpUrl;
-	}
-	cfg.browser = browser;
-	seeded.push("browser");
-}
-
-if (!("gateway" in cfg)) {
-	const gateway = JSON.parse(JSON.stringify(template.gateway ?? {}));
-	const allowed = gateway?.controlUi?.allowedOrigins;
-	if (Array.isArray(allowed)) {
-		gateway.controlUi.allowedOrigins = allowed.map((origin) =>
-			origin.includes("__OPENCLAW_GATEWAY_PORT__")
-				? origin.replace(/__OPENCLAW_GATEWAY_PORT__/g, gwPort)
-				: origin
-		);
-	}
-	cfg.gateway = gateway;
-	seeded.push("gateway");
-}
-
-if (!("skills" in cfg)) {
-	const skills = JSON.parse(JSON.stringify(template.skills ?? {}));
-	cfg.skills = skills;
-	seeded.push("skills");
-}
-
-if (!("plugins" in cfg)) {
-	cfg.plugins = JSON.parse(JSON.stringify(template.plugins ?? {}));
-	seeded.push("plugins");
-}
-
-if (!("models" in cfg)) {
-	cfg.models = JSON.parse(JSON.stringify(template.models ?? {}));
-	seeded.push("models");
-}
-
-if (!("agents" in cfg)) {
-	cfg.agents = JSON.parse(JSON.stringify(template.agents ?? {}));
-	seeded.push("agents");
-} else {
-	const tplAgents = template.agents ?? {};
-	const cfgAgents = cfg.agents;
-	const tplDefaults = tplAgents.defaults ?? {};
-	cfgAgents.defaults ??= {};
-	const added = Object.keys(tplDefaults).filter((k) => k !== "workspace" && !(k in cfgAgents.defaults));
-	for (const k of added) {
-		cfgAgents.defaults[k] = JSON.parse(JSON.stringify(tplDefaults[k]));
-	}
-	if (added.length > 0) seeded.push("agents.defaults.merge");
-	if (!("list" in cfgAgents) && "list" in tplAgents) {
-		cfgAgents.list = JSON.parse(JSON.stringify(tplAgents.list));
-		seeded.push("agents.list");
-	}
-}
-
 if (updateLitellmApiKey(cfg.models)) {
 	seeded.push("models.litellm.apiKey");
 }
