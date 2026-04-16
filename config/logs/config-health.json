@@ -1,0 +1,22 @@
+{
+  "entries": {
+    "/home/node/.openclaw/openclaw.json": {
+      "lastKnownGood": {
+        "hash": "cbadab1859342de423fa6beef19a740c6fc7de24de2c2fa43ea6ae655c0a09d7",
+        "bytes": 4775,
+        "mtimeMs": 1776351560102.1338,
+        "ctimeMs": 1776351560120.0881,
+        "dev": "70",
+        "ino": "1407374883631769",
+        "mode": 384,
+        "nlink": 1,
+        "uid": 1000,
+        "gid": 1000,
+        "hasMeta": true,
+        "gatewayMode": "local",
+        "observedAt": "2026-04-16T14:59:20.140Z"
+      },
+      "lastObservedSuspiciousSignature": null
+    }
+  }
+}

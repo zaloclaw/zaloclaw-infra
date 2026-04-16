@@ -2,12 +2,12 @@ services:
   openclaw-gateway:
     volumes:
       - openclaw_home:/home/node
-      - /Users/hungnguyen/.openclaw_z:/home/node/.openclaw
-      - /Users/hungnguyen/.openclaw_z/workspace:/home/node/.openclaw/workspace
+      - C:\Users\hungg\.openclaw_z:/home/node/.openclaw
+      - C:\Users\hungg\.openclaw_z\workspace:/home/node/.openclaw/workspace
   openclaw-cli:
     volumes:
       - openclaw_home:/home/node
-      - /Users/hungnguyen/.openclaw_z:/home/node/.openclaw
-      - /Users/hungnguyen/.openclaw_z/workspace:/home/node/.openclaw/workspace
+      - C:\Users\hungg\.openclaw_z:/home/node/.openclaw
+      - C:\Users\hungg\.openclaw_z\workspace:/home/node/.openclaw/workspace
 volumes:
   openclaw_home:

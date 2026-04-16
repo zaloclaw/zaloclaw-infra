@@ -1,0 +1,30 @@
+{
+  "providers": {
+    "litellm": {
+      "baseUrl": "http://host.docker.internal:4000",
+      "apiKey": "test_key_123",
+      "auth": "api-key",
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "openclaw-smart-router",
+          "name": "Auto Router - Complexity",
+          "reasoning": false,
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 128000,
+          "maxTokens": 8192,
+          "api": "openai-completions"
+        }
+      ]
+    }
+  }
+}
